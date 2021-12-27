@@ -4,8 +4,8 @@
  * 
  * @author
  *   Grupo: al012
- *      - Valentim Santos ist199343
- *      - Tiago Santos ist199333
+ *     - Valentim Santos ist199343
+ *     - Tiago Santos ist199333
  */
 
 
@@ -13,6 +13,15 @@
 #include <vector>
 #include <string>
 #include <sstream>
+
+
+void computeInput();
+void solveProblem1(std::vector<int> &values);
+void findNumberOfLIS(std::vector<int> values);
+int LISBinarySearch(std::vector<int> &values, int left, int right, int key);
+void solveProblem2(std::vector<std::vector<int>> &values);
+int LongestCommonSubsequence(std::vector<int> &values1, std::vector<int> &values2, int i, int j);
+void printValues(std::vector<int> &values);
 
 
 int main()
@@ -163,7 +172,7 @@ void LongestIncreasingSubsequence(std::vector<int> &values)
  
         // values[i] is the new highest value. We add it to the aux vector, as it is now
         // the new end value for the new longest subsequence.
-        else if (values[i] > aux[len - 1])
+        else if (values[i] > aux[len - 1]) 
             aux[len++] = values[i];
  
         // values[i] is neither smaller than the first value of aux, nor is it greater than the last one.
@@ -183,12 +192,84 @@ void LongestIncreasingSubsequence(std::vector<int> &values)
 
 
 
+/**
+ * @brief
+ *   finds the length of the longest increasing subsequence of a sequence, aswell as the number
+ *   of subsequences of that same length.
+ * 
+ * std::vector<int> lengths:
+ *   - vector containing the length of the longest increasing subsequence ending at
+ *     each index (lengths[2] stores the length of the LCS ending on index 2)
+ * 
+ * std::vector<int> counts:
+ *   - vector containing the number of subsequences of max length ending at each
+ *     index. (if there are two LCSs ending on index 3, counts[3] = 2)
+ * 
+ * @param values 
+ */
+void findNumberOfLIS(std::vector<int> values)
+{
+    int size = values.size();
+    int max_len = 1;
+
+    if (size <= 1) {
+        std::cout << size << " " << max_len << std::endl;
+        return;
+    }
+    
+    // initializes both the lengths and counts arrays with 1, as the maximum length of 
+    // any subsequence is atleast one, and there also exists atleast one subsequence of
+    // such length.
+    std::vector<int> lengths(size, 1);
+    std::vector<int> counts(size, 1);
+    
+    for(int i = 0; i < size; i++) {
+        for(int j = 0; j < i; j++) {
+            
+            // if the current value is greater than any of the previous ones, it means 
+            // that this value is apart of a new subsequence.
+            if(values[i] > values[j]) {
+                
+                // since values[i] is the new greatest element of the LIS ending on index
+                // i (lengths[i]), if lengths[i] is less than or equal to the lengths[j],
+                // then lengths[i] should be 1 bigger than lengths[j], since values[i] is 
+                // the new greatest element of the subsequence, after we add it, its length
+                // increments by one.
+                if(lengths[i] <= lengths[j]) {
+                    lengths[i] = lengths[j] + 1;
+                    counts[i] = counts[j];
+                }
+                else if(lengths[i] == lengths[j] + 1)
+                    counts[i] += counts[j];
+            }
+        }
+    }
+
+    // stores the number of subsequences of max length
+    int LIS_counter = 0;
+    
+    // finds the legth of the longest increasing subsequence
+    for (int len: lengths) {
+        if(len > max_len)
+            max_len = len;
+    }
+    
+    for(int i = 0; i < size; i++) {
+        if (lengths[i] == max_len)
+            LIS_counter += counts[i];
+    }
+
+    std::cout << max_len << " " << LIS_counter << std::endl;
+}
+
+
 void solveProblem1(std::vector<int> &values)
 {
     std::cout << "Sequence:" << std::endl;
     printValues(values);
-
-    LongestIncreasingSubsequence(values);
+    
+    findNumberOfLIS(values);
+    //LongestIncreasingSubsequence(values);
 }
 
 
