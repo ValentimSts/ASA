@@ -9,6 +9,7 @@
  */
 
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 #include <string>
 #include <sstream>
@@ -25,7 +26,6 @@ int main()
     computeInput();
     return 0;
 }
-
 
 
 /**
@@ -59,6 +59,9 @@ void computeInput()
     }
     else if(problem == 2) {
 
+        bool first_vector = true;
+
+        std::unordered_map<int, int> dupe_values;
         std::vector<std::vector<int>> values2;
         std::string line;
 
@@ -69,10 +72,20 @@ void computeInput()
                 std::stringstream stream(line);
                 std::vector<int> aux;
 
+                // only includes in the second vector the values common
+                // to the first one, since these are skipped either way
                 while(stream >> val) {
-                    aux.push_back(val);
+
+                    if(first_vector) {
+                        dupe_values[val]++;
+                        aux.push_back(val);
+                    }
+                    else 
+                        if(dupe_values[val] > 0) 
+                            aux.push_back(val);
                 }
 
+                first_vector = false;
                 values2.push_back(aux);
             }
         }
@@ -210,7 +223,7 @@ void LCIS(std::vector<int> &values1, std::vector<int> &values2, int len1, int le
         size = len2;
 
     // we initialize the lcis vector as 0 since at the start there
-    // are no known common incrasing subsequences.
+    // are no known common increasing subsequences.
     std::vector<int> lcis(size, 0);
 
     for(int i = 0; i < len1; i++) {
