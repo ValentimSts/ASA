@@ -1,7 +1,4 @@
 /**
- * @file
- *   p1.cpp
- * 
  * @author
  *   Grupo: al012
  *     - Valentim Santos ist199343
@@ -43,7 +40,7 @@ void computeInput()
     std::cin >> problem;
 
     if(!std::cin) {
-        std::cout << "input error" << std::endl;
+        std::cerr << "input error" << std::endl;
         exit(1);
     }
     
@@ -75,7 +72,6 @@ void computeInput()
                 // only includes in the second vector the values common
                 // to the first one, since these are skipped either way
                 while(stream >> val) {
-
                     if(first_vector) {
                         dupe_values[val]++;
                         aux.push_back(val);
@@ -93,13 +89,12 @@ void computeInput()
         solveProblem2(values2);
     }
     else {
-        std::cout << "invalid input...ending" << std::endl;
+        std::cerr << "invalid input...ending" << std::endl;
     }
 }
 
 
 /* Problem 1 */
-
 void solveProblem1(std::vector<int> &values)
 {
     LIS(values);
@@ -184,7 +179,6 @@ void LIS(std::vector<int> values)
 
 
 /* Problem 2 */
-
 void solveProblem2(std::vector<std::vector<int>> &values)
 {
     int i = values[0].size();
