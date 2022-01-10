@@ -10,7 +10,7 @@ Por exemplo:
 
 ## Problema 2
 Dadas duas sequências ```x =〈x0,x1, ...,xk〉```e ```y =〈y0,y1, ...,yl〉```de inteiros, pretende calcular-se o tamanho da maior **subsequência comum estritamente
-crescente** entre ```x``` e ```y```, bem como o número de **subsequências comuns estritamente crescentes de tamanho máximo**.
+crescente** entre ```x``` e ```y```.
 Porexemplo:
 - as sequências ```x =〈1,2,6,3,7〉```e ```y =〈1,2,4,7,3〉```têm duas **subsequências comuns estritamente crescentes de tamanho máximo** igual a ```3```: ```s1=〈1,2,3〉```
   e ```s2=〈1,2,7〉```.
@@ -46,5 +46,5 @@ O  programa  deverá  escrever  no  output  dois  inteiros ***t*** e ***c*** sep
 ```
 ## Output
 ```
-3 2
+3
 ```
