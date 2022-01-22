@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include <vector>
 
 #define parent1 0
@@ -34,12 +35,12 @@ void computeInput() {
     int v1, v2, n_vertices, n_edges;
 
     if (scanf("%d %d", &v1, &v2) != 2) {
-        std::cout << 0;
+        std::cout << 0 << std::endl;
         return;
     }
 
     if (scanf("%d %d", &n_vertices, &n_edges) != 2) {
-        std::cout << 0;
+        std::cout << 0 << std::endl;
         return;
     }
 
@@ -67,7 +68,7 @@ void computeInput() {
 
     for (int i = 0; i < n_edges; i++) {
         if (scanf("%d %d", &u, &v) != 2) {
-            std::cout << 0;
+            std::cout << 0 << std::endl;
             return;   
         }
 
@@ -75,7 +76,7 @@ void computeInput() {
 
         // If the node has more than 2 parents, the tree is invalid.
         if (parent_pos == 2) {
-            std::cout << "-" << std::endl;
+            std::cout << 0 << std::endl;
             return;
         }
 
@@ -120,7 +121,7 @@ void DFS(int** graph, int target_node, int curr_weight) {
 
 
 void getLCA(int** graph, int n_vertices, int n_edges) {
-    std::vector<int> common_nodes;
+    std::vector<int> lca;
     int min = n_edges, n_lca = 0;
 
 
@@ -128,24 +129,26 @@ void getLCA(int** graph, int n_vertices, int n_edges) {
         // If the node has been visited atleast 2 times its a common node
         // between the two DFS.
         if (graph[i][visited] >= 2) {
-            common_nodes.push_back(i);
+            lca.push_back(i);
+            n_lca++;
 
             if (graph[i][weight] < min) {
                 min = graph[i][weight];
-                n_lca = 0;
             }
-            n_lca++;
         }
     }
 
-    for (auto node_id: common_nodes) {
+    if (n_lca == 0) {
+        std::cout << "-" << std::endl;
+        return;
+    }
+
+    std::sort(lca.begin(), lca.end());
+
+    for (auto node_id: lca) {
         if (graph[node_id][weight] == min) {
-            if (n_lca >  1) {
+            if (n_lca >  1)
                 std::cout << node_id+1 << " ";
-            }
-            else {
-                std::cout << node_id+1;
-            }
         }
     }
 
