@@ -8,9 +8,8 @@
 #define visited 4
 
 void computeInput();
-void printGraph(int** graph, int size);
 void DFS(int** graph, int target_node, int curr_weight);
-void getLCA(int** graph, int size);
+void getLCA(int** graph, int n_vertices, int n_edges);
 
 int main() {
     computeInput();
@@ -49,31 +48,27 @@ void computeInput() {
     // index is used as the identifier of the node, and contains its
     // parent(s) id, aswell as some extra information (explained bellow).
     int** graph = new int*[n_vertices];
+    for (int i = 0; i < n_vertices; i++) {
+        // We initialize all the nodes with an array of 4 posiztion:
+        // ----------------------------------------------------------
+        //   index 0 (parent1): first parent node
+        //   index 1 (parent2): second parent node (if needed)
+        //   index 2 (n_paents): number of parents
+        //   index 3 (weight): weight of the node (to be found after the DFS)
+        //   index 4 (visited): number of times the node has been visited (DFS)
+        graph[i] = new int[5];
+
+        graph[i][parent1] = -1;
+        graph[i][parent2] = -1;
+        graph[i][n_parents] = 0;
+        graph[i][weight] = n_edges;
+        graph[i][visited] = 0;
+    }
 
     for (int i = 0; i < n_edges; i++) {
         if (scanf("%d %d", &u, &v) != 2) {
             std::cout << 0;
             return;   
-        }
-
-        
-        // v-1 because the node ids go from 1 to n
-        if (graph[v-1] == NULL) {
-            // If the node hasn't been initialized, we initialize it with
-            // 4 positions:
-            // ----------------------------------------------------------
-            //   index 0: first parent node
-            //   index 1: second parent node (if needed)
-            //   index 2: number of parents
-            //   index 3: weight of the node (to be found after the DFS)
-            //   index 4: number of times the node has been visited (DFS)
-            graph[v-1] = new int[5];
-
-            graph[v-1][parent1] = -1;
-            graph[v-1][parent2] = -1;
-            graph[v-1][n_parents] = 0;
-            graph[v-1][weight] = 0;
-            graph[v-1][visited] = 0;
         }
 
         int parent_pos = graph[v-1][n_parents];
@@ -90,72 +85,69 @@ void computeInput() {
         graph[v-1][n_parents]++;
     }
 
-    printGraph(graph, n_vertices);
-
     DFS(graph, v1, 0);
     DFS(graph, v2, 0);
 
-    getLCA(graph, n_vertices);
+    getLCA(graph, n_vertices, n_edges);
 }
 
 
 void DFS(int** graph, int target_node, int curr_weight) {
-    // node has no parents 
-    if (graph[target_node] == NULL) {
-        graph[target_node] = new int[5];
+    // We decrement the targe_node because, once again, the node
+    // ids go from 1 to n, and we want them to go from 0 to n-1.
+    target_node--;
 
-        graph[target_node][weight] = curr_weight;
+    if (graph[target_node][n_parents] == 0) {
+        // Node has no parents and so we end the algorithm
+        if (graph[target_node][weight] > curr_weight) {
+            graph[target_node][weight] = curr_weight;
+        }
         graph[target_node][visited]++;
-
         return;
     }
 
-    graph[target_node][weight] = curr_weight++;
+    // We only want to keep the lowest cost to get to a certain node (weight),
+    // whether its from node v1 or v2, we only want the lowest one.
+    if (graph[target_node][weight] > curr_weight) {
+        graph[target_node][weight] = curr_weight;
+    }
     graph[target_node][visited]++;
 
     for (int i = 0; i < graph[target_node][n_parents]; i++) {
-        DFS(graph, graph[target_node][i], curr_weight);
+        DFS(graph, graph[target_node][i], curr_weight+1);
     }
 }
 
 
-void getLCA(int** graph, int size) {
+void getLCA(int** graph, int n_vertices, int n_edges) {
     std::vector<int> common_nodes;
-    std::vector<int> res;
-    bool first_common = true;
-    int min;
+    int min = n_edges, n_lca = 0;
 
-    for (int i = 0; i < size; i++) {
-        if (graph[i][visited] == 2) {
-            if (first_common) {
-                first_common = false;
-                min = graph[i][weight];
-            }
 
+    for (int i = 0; i < n_vertices; i++) {
+        // If the node has been visited atleast 2 times its a common node
+        // between the two DFS.
+        if (graph[i][visited] >= 2) {
             common_nodes.push_back(i);
 
             if (graph[i][weight] < min) {
                 min = graph[i][weight];
+                n_lca = 0;
+            }
+            n_lca++;
+        }
+    }
+
+    for (auto node_id: common_nodes) {
+        if (graph[node_id][weight] == min) {
+            if (n_lca >  1) {
+                std::cout << node_id+1 << " ";
+            }
+            else {
+                std::cout << node_id+1;
             }
         }
     }
 
-    for (auto val: common_nodes) {
-        if (graph[val][weight] == min)
-            res.push_back(val);
-    }
-
-    for (auto val: res) {
-        std::cout << val << " ";
-    }
-
     std::cout << std::endl;
-}
-
-
-void printGraph(int** graph, int size) {
-    for (int i = 0; i < size; i++) {
-        if (graph[i] != NULL)
-            std::cout << i+1 << " <- " << graph[i][parent1] << " " << graph[i][parent2] << std::endl;
-    }  
 }
