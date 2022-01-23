@@ -1,22 +1,34 @@
+/**
+ * @author
+ *      al012: Valentim Santos (99343), Tiago Santos (99333)
+ * @brief
+ *      Finds the lowest common ancestor of two different nodes from a
+ *      direct acyclic graph.
+ */
+
+
 #include <iostream>
 #include <algorithm>
 #include <vector>
+
 
 #define parent1 0
 #define parent2 1
 #define n_parents 2
 #define visited 3
 
+
 typedef enum {
     WHITE, BLUE, YELLOW, GREEN, BLACK
 } visit_type;
 
+
 void computeInput();
-bool isCyclic(int** graph, int target_node, bool* cycle_check);
 void DFS(int** graph, int target_node, visit_type color);
 void visitNode(int** graph, int target_node, visit_type color);
-void getLCA(int** graph, int n_vertices, int n_edges);
+void getLCA(int** graph, int n_vertices);
 void DFS_aux(int** graph, int target_node);
+
 
 int main() {
     computeInput();
@@ -56,9 +68,6 @@ void computeInput() {
     // parent(s) id, aswell as some extra information (explained bellow).
     int** graph = new int*[n_vertices];
 
-    // Array used to check for cycles in the graph.
-    bool* cycle_check = new bool[n_vertices];
-
     for (int i = 0; i < n_vertices; i++) {
         // We initialize all the nodes with an array of 4 posiztion:
         // ----------------------------------------------------------
@@ -73,8 +82,6 @@ void computeInput() {
         graph[i][parent2] = -1;
         graph[i][n_parents] = 0;
         graph[i][visited] = WHITE;
-
-        cycle_check[i] = false;
     }
 
     for (int i = 0; i < n_edges; i++) {
@@ -83,6 +90,7 @@ void computeInput() {
             return;   
         }
 
+        // Cycle
         if (u == v) {
             std::cout << 0 << std::endl;
             return;
@@ -105,31 +113,23 @@ void computeInput() {
     DFS(graph, v1, BLUE);
     DFS(graph, v2, YELLOW);
 
-    getLCA(graph, n_vertices, n_edges);
+    getLCA(graph, n_vertices);
 }
 
 
-bool isCyclic(int** graph, int target_node, bool* cycle_check) {
-    if (cycle_check[target_node] == false) {
-        cycle_check[target_node] = true;
- 
-        for (int i = 0; i < graph[target_node][n_parents]; i++) {
-            int parent_id = graph[target_node][i] - 1;
-
-            if (!cycle_check[parent_id] && isCyclic(graph, parent_id, cycle_check)) {
-                return true;
-            }
-            else if (cycle_check[parent_id]) {
-                return true;
-            }
-        }
-    }
-
-    cycle_check[target_node] = false;
-    return false;
-}
-
-
+/**
+ * @brief 
+ *      Simple DFS algorithm, used to visit all the nodes we need. A node that
+ *      has been visited once will be painted BLUE/YELLOW, a node that has been
+ *      visited twice will be painted GREEN.
+ * 
+ * @param graph
+ *      The graph we want to visit.
+ * @param target_node
+ *      The starting node.
+ * @param color
+ *      Color of the search (BLUE or YELLOW).
+ */
 void DFS(int** graph, int target_node, visit_type color) {
     // We decrement the targe_node because, once again, the node
     // ids go from 1 to n, and we want them to go from 0 to n-1.
@@ -149,6 +149,17 @@ void DFS(int** graph, int target_node, visit_type color) {
 }
 
 
+/**
+ * @brief
+ *      Visits a node and colors it accordingly.
+ * 
+ * @param graph
+ *      The node's graph.
+ * @param target_node 
+ *      The node we want to visit.
+ * @param color
+ *      The color we're currently using to visit the nodes.
+ */
 void visitNode(int** graph, int target_node, visit_type color) {
     // If the node hasn't yet been visited, we visit it with the current
     // color we're using.
@@ -164,7 +175,17 @@ void visitNode(int** graph, int target_node, visit_type color) {
 }
 
 
-void getLCA(int** graph, int n_vertices, int n_edges) {
+/**
+ * @brief 
+ *      Finds the lowest common ancestor of our 2 initial nodes, by
+ *      analyzing the sub-graph created from the 2 DFSs.
+ * 
+ * @param graph
+ *      Our main graph.
+ * @param n_vertices 
+ *      The number of vertices of the graph.
+ */
+void getLCA(int** graph, int n_vertices) {
     std::vector<int> lca;
     int size = 0;
 
@@ -186,7 +207,7 @@ void getLCA(int** graph, int n_vertices, int n_edges) {
 
     for (int common_node: lca) {
         // We color all the parent nodes from the common sub-graph BLACK,
-        // all the nodes that aren't colored black (after this function call) 
+        // all the nodes that aren't colored black (after this operation) 
         // are the ones we are looking for.
         for (int i = 0; i < graph[common_node][n_parents]; i++) {
             int parent_id = graph[common_node][i] - 1;
