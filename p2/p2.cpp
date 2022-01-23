@@ -5,12 +5,17 @@
 #define parent1 0
 #define parent2 1
 #define n_parents 2
-#define weight 3
-#define visited 4
+#define visited 3
+
+typedef enum {
+    WHITE, BLUE, YELLOW, GREEN, BLACK
+} visit_type;
 
 void computeInput();
-void DFS(int** graph, int target_node, int curr_weight);
+void DFS(int** graph, int target_node, visit_type color);
+void visitNode(int** graph, int target_node, visit_type color);
 void getLCA(int** graph, int n_vertices, int n_edges);
+void DFS_aux(int** graph, int target_node);
 
 int main() {
     computeInput();
@@ -57,13 +62,12 @@ void computeInput() {
         //   index 2 (n_paents): number of parents
         //   index 3 (weight): weight of the node (to be found after the DFS)
         //   index 4 (visited): number of times the node has been visited (DFS)
-        graph[i] = new int[5];
+        graph[i] = new int[4];
 
         graph[i][parent1] = -1;
         graph[i][parent2] = -1;
         graph[i][n_parents] = 0;
-        graph[i][weight] = n_edges;
-        graph[i][visited] = 0;
+        graph[i][visited] = WHITE;
     }
 
     for (int i = 0; i < n_edges; i++) {
@@ -86,55 +90,58 @@ void computeInput() {
         graph[v-1][n_parents]++;
     }
 
-    DFS(graph, v1, 0);
-    DFS(graph, v2, 0);
+    DFS(graph, v1, BLUE);
+    DFS(graph, v2, YELLOW);
 
     getLCA(graph, n_vertices, n_edges);
 }
 
 
-void DFS(int** graph, int target_node, int curr_weight) {
+void DFS(int** graph, int target_node, visit_type color) {
     // We decrement the targe_node because, once again, the node
     // ids go from 1 to n, and we want them to go from 0 to n-1.
     target_node--;
 
     if (graph[target_node][n_parents] == 0) {
         // Node has no parents and so we end the algorithm
-        if (graph[target_node][weight] > curr_weight) {
-            graph[target_node][weight] = curr_weight;
-        }
-        graph[target_node][visited]++;
+        visitNode(graph, target_node, color);
         return;
     }
 
-    // We only want to keep the lowest cost to get to a certain node (weight),
-    // whether its from node v1 or v2, we only want the lowest one.
-    if (graph[target_node][weight] > curr_weight) {
-        graph[target_node][weight] = curr_weight;
-    }
-    graph[target_node][visited]++;
+    visitNode(graph, target_node, color);
 
     for (int i = 0; i < graph[target_node][n_parents]; i++) {
-        DFS(graph, graph[target_node][i], curr_weight+1);
+        DFS(graph, graph[target_node][i], color);
+    }
+}
+
+
+void visitNode(int** graph, int target_node, visit_type color) {
+    // If the node hasn't yet been visited, we visit it with the current
+    // color we're using.
+    if (graph[target_node][visited] == WHITE) {
+        graph[target_node][visited] = color;
+    }
+    // If the node was already BLUE and our current color is YELLOW it means
+    // that node is a common node between both sub-graphs, and so we color it
+    // GREEN.
+    else if (graph[target_node][visited] == BLUE && color == YELLOW) {
+        graph[target_node][visited] = GREEN;
     }
 }
 
 
 void getLCA(int** graph, int n_vertices, int n_edges) {
     std::vector<int> lca;
-    int min = n_edges, n_lca = 0;
+    int n_lca = 0;
 
 
     for (int i = 0; i < n_vertices; i++) {
-        // If the node has been visited atleast 2 times its a common node
-        // between the two DFS.
-        if (graph[i][visited] >= 2) {
+        // If the node id GREEN its a common node
+        // between the two sub-graphs.
+        if (graph[i][visited] == GREEN) {
             lca.push_back(i);
             n_lca++;
-
-            if (graph[i][weight] < min) {
-                min = graph[i][weight];
-            }
         }
     }
 
@@ -145,12 +152,23 @@ void getLCA(int** graph, int n_vertices, int n_edges) {
 
     std::sort(lca.begin(), lca.end());
 
-    for (auto node_id: lca) {
-        if (graph[node_id][weight] == min) {
-            if (n_lca >  1)
-                std::cout << node_id+1 << " ";
+    for (int common_node: lca) {
+        DFS_aux(graph, common_node);
+    }
+
+    for (int common_node: lca) {
+        if (graph[common_node][visited] != BLACK) {
+            std::cout << common_node+1 << " ";
         }
     }
 
     std::cout << std::endl;
+}
+
+void DFS_aux(int** graph, int target_node) {
+
+    for (int i = 0; i < graph[target_node][n_parents]; i++) {
+        int parent_id = graph[target_node][i];
+        graph[parent_id-1][visited] = BLACK;
+    }
 }
