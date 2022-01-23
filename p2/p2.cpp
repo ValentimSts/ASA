@@ -83,6 +83,11 @@ void computeInput() {
             return;   
         }
 
+        if (u == v) {
+            std::cout << 0 << std::endl;
+            return;
+        }
+
         int parent_pos = graph[v-1][n_parents];
 
         // If the node has more than 2 parents, the tree is invalid.
@@ -95,13 +100,6 @@ void computeInput() {
 
         // Increments the number of parents of the node
         graph[v-1][n_parents]++;
-    }
-
-    for (int i = 0; i < n_vertices; i++) {
-        if (isCyclic(graph, i, cycle_check)) {
-            std::cout << 0 << std::endl;
-            return;
-        }
     }
 
     DFS(graph, v1, BLUE);
@@ -125,7 +123,6 @@ bool isCyclic(int** graph, int target_node, bool* cycle_check) {
                 return true;
             }
         }
- 
     }
 
     cycle_check[target_node] = false;
