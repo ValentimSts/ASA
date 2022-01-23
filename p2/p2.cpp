@@ -129,19 +129,46 @@ void computeInput() {
 }
 
 
+/**
+ * @brief 
+ *      Checks if there exists a cycle in the graph, by
+ *      traveling through every node.
+ * 
+ * @param graph
+ *      Graph we want to check cycles in.
+ * @param target_node 
+ *      The node we want to start in.
+ * @param cycle_check 
+ *      Array containing the colors of each node.
+ * @return true
+ *      If there is a cycle in the graph.
+ * @return false 
+ *      If the graph is Acyclic.
+ */
 bool checkCycle(int** graph, int target_node, int* cycle_check) {
+    // We color the node BLUE the first time we visit it.
     cycle_check[target_node] = BLUE;
 
+    // If the node has parents, we color them.
     for (int i = 0; i < graph[target_node][n_parents]; i++) {
         int parent_id = graph[target_node][i] - 1;
 
         if (cycle_check[parent_id] == WHITE) {
-            checkCycle(graph, parent_id, cycle_check);
+            // If the parent node hasn't been visited, we do just that 
+            // (recursive call now with the parent node).
+            if (checkCycle(graph, parent_id, cycle_check)) {
+                return true;
+            }
         }
+        // When we find a parent node that is also BLUE it means
+        // we have found a cycle.
         else if (cycle_check[parent_id] == BLUE) {
             return true;
         }
     }
+    // When we have visited all the node's parents we color it BLACK
+    // (menaing we are exiting our search) and can safely say there is no
+    // cycle starting on "target_node".
     cycle_check[target_node] = BLACK;
     return false;
 }
