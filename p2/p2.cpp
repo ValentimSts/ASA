@@ -12,6 +12,7 @@ typedef enum {
 } visit_type;
 
 void computeInput();
+bool isCyclic(int** graph, int target_node, bool* cycle_check);
 void DFS(int** graph, int target_node, visit_type color);
 void visitNode(int** graph, int target_node, visit_type color);
 void getLCA(int** graph, int n_vertices, int n_edges);
@@ -54,6 +55,10 @@ void computeInput() {
     // index is used as the identifier of the node, and contains its
     // parent(s) id, aswell as some extra information (explained bellow).
     int** graph = new int*[n_vertices];
+
+    // Array used to check for cycles in the graph.
+    bool* cycle_check = new bool[n_vertices];
+
     for (int i = 0; i < n_vertices; i++) {
         // We initialize all the nodes with an array of 4 posiztion:
         // ----------------------------------------------------------
@@ -68,6 +73,8 @@ void computeInput() {
         graph[i][parent2] = -1;
         graph[i][n_parents] = 0;
         graph[i][visited] = WHITE;
+
+        cycle_check[i] = false;
     }
 
     for (int i = 0; i < n_edges; i++) {
@@ -90,10 +97,39 @@ void computeInput() {
         graph[v-1][n_parents]++;
     }
 
+    for (int i = 0; i < n_vertices; i++) {
+        if (isCyclic(graph, i, cycle_check)) {
+            std::cout << 0 << std::endl;
+            return;
+        }
+    }
+
     DFS(graph, v1, BLUE);
     DFS(graph, v2, YELLOW);
 
     getLCA(graph, n_vertices, n_edges);
+}
+
+
+bool isCyclic(int** graph, int target_node, bool* cycle_check) {
+    if (cycle_check[target_node] == false) {
+        cycle_check[target_node] = true;
+ 
+        for (int i = 0; i < graph[target_node][n_parents]; i++) {
+            int parent_id = graph[target_node][i] - 1;
+
+            if (!cycle_check[parent_id] && isCyclic(graph, parent_id, cycle_check)) {
+                return true;
+            }
+            else if (cycle_check[parent_id]) {
+                return true;
+            }
+        }
+ 
+    }
+
+    cycle_check[target_node] = false;
+    return false;
 }
 
 
@@ -133,19 +169,18 @@ void visitNode(int** graph, int target_node, visit_type color) {
 
 void getLCA(int** graph, int n_vertices, int n_edges) {
     std::vector<int> lca;
-    int n_lca = 0;
-
+    int size = 0;
 
     for (int i = 0; i < n_vertices; i++) {
-        // If the node id GREEN its a common node
+        // If the node is GREEN its a common node
         // between the two sub-graphs.
         if (graph[i][visited] == GREEN) {
             lca.push_back(i);
-            n_lca++;
+            size++;
         }
     }
 
-    if (n_lca == 0) {
+    if (size == 0) {
         std::cout << "-" << std::endl;
         return;
     }
@@ -153,7 +188,14 @@ void getLCA(int** graph, int n_vertices, int n_edges) {
     std::sort(lca.begin(), lca.end());
 
     for (int common_node: lca) {
-        DFS_aux(graph, common_node);
+        // We color all the parent nodes from the common sub-graph BLACK,
+        // all the nodes that aren't colored black (after this function call) 
+        // are the ones we are looking for.
+        for (int i = 0; i < graph[common_node][n_parents]; i++) {
+            int parent_id = graph[common_node][i] - 1;
+
+            graph[parent_id][visited] = BLACK;
+        }
     }
 
     for (int common_node: lca) {
@@ -163,12 +205,4 @@ void getLCA(int** graph, int n_vertices, int n_edges) {
     }
 
     std::cout << std::endl;
-}
-
-void DFS_aux(int** graph, int target_node) {
-
-    for (int i = 0; i < graph[target_node][n_parents]; i++) {
-        int parent_id = graph[target_node][i];
-        graph[parent_id-1][visited] = BLACK;
-    }
 }
