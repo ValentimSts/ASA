@@ -24,6 +24,7 @@ typedef enum {
 
 
 void computeInput();
+bool checkCycle(int** graph, int target_node, int* cycle_check);
 void DFS(int** graph, int target_node, visit_type color);
 void visitNode(int** graph, int target_node, visit_type color);
 void getLCA(int** graph, int n_vertices);
@@ -68,14 +69,16 @@ void computeInput() {
     // parent(s) id, aswell as some extra information (explained bellow).
     int** graph = new int*[n_vertices];
 
+    // Array used to check for cycles in the graph.
+    int* cycle_check = new int[n_vertices];
+
     for (int i = 0; i < n_vertices; i++) {
         // We initialize all the nodes with an array of 4 posiztion:
         // ----------------------------------------------------------
         //   index 0 (parent1): first parent node
         //   index 1 (parent2): second parent node (if needed)
-        //   index 2 (n_paents): number of parents
-        //   index 3 (weight): weight of the node (to be found after the DFS)
-        //   index 4 (visited): number of times the node has been visited (DFS)
+        //   index 2 (n_parents): number of parents
+        //   index 3 (visited): color of the ode after being visited (DFS)
         graph[i] = new int[4];
 
         graph[i][parent1] = -1;
@@ -109,11 +112,38 @@ void computeInput() {
         // Increments the number of parents of the node
         graph[v-1][n_parents]++;
     }
+    
+    for (int i = 0; i < n_vertices; i++) {
+        if (cycle_check[i] == WHITE) {
+            if(checkCycle(graph, i, cycle_check)) {
+                std::cout << 0 << std::endl;
+                return;
+            }
+        }
+    }
 
     DFS(graph, v1, BLUE);
     DFS(graph, v2, YELLOW);
 
     getLCA(graph, n_vertices);
+}
+
+
+bool checkCycle(int** graph, int target_node, int* cycle_check) {
+    cycle_check[target_node] = BLUE;
+
+    for (int i = 0; i < graph[target_node][n_parents]; i++) {
+        int parent_id = graph[target_node][i] - 1;
+
+        if (cycle_check[parent_id] == WHITE) {
+            checkCycle(graph, parent_id, cycle_check);
+        }
+        else if (cycle_check[parent_id] == BLUE) {
+            return true;
+        }
+    }
+    cycle_check[target_node] = BLACK;
+    return false;
 }
 
 
