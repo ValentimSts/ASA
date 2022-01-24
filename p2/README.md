@@ -1,6 +1,6 @@
 
 
-## Descrição do Problema
+# Descrição do Problema
 
 Uma árvore genealógica consiste num grafo dirigido em que cada nó representa uma pessoa e os vizinhos directos de um nó correspondem aos seus filhos, podendo existir 
 nós orfãos, nós com um progenitor e nós com dois progenitores. Dados dois nós ``P1`` e ``P2`` de uma árvore genealógica:
