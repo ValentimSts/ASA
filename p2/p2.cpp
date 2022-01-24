@@ -2,7 +2,7 @@
  * @author
  *      al012: Valentim Santos (99343), Tiago Santos (99333)
  * @brief
- *      Finds the lowest common ancestor of two different nodes from a
+ *      Finds the lowest common ancestor between two different nodes from a
  *      direct acyclic graph.
  */
 
