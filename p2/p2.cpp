@@ -2,8 +2,10 @@
  * @author
  *      al012: Valentim Santos (99343), Tiago Santos (99333)
  * @brief
- *      Finds the lowest common ancestor between two different nodes from a
+ *      Finds the lowest common ancestor of two different nodes from a
  *      direct acyclic graph.
+ * 
+ *      Final score: 1700/1700
  */
 
 
@@ -78,7 +80,7 @@ void computeInput() {
         //   index 0 (parent1): first parent node
         //   index 1 (parent2): second parent node (if needed)
         //   index 2 (n_parents): number of parents
-        //   index 3 (visited): color of the ode after being visited (DFS)
+        //   index 3 (visited): color of the node. Changes when visited (DFS)
         graph[i] = new int[4];
 
         graph[i][parent1] = -1;
